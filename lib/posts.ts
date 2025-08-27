@@ -57,7 +57,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     const { data, content } = matter(fileContents)
 
     // 将Markdown转换为HTML
-    const htmlContent = marked(content)
+    const htmlContent = await marked(content)
 
     // 计算阅读时间（以250字/分钟计算）
     const wordCount = content.replace(/\s+/g, '').length

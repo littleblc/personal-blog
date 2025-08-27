@@ -3,9 +3,8 @@ module.exports = {
   apps: [
     {
       name: 'personal-blog',
-      script: 'npm',
-      args: 'start',
-      cwd: '/var/www/blog',
+      script: 'start-blog.js',
+      cwd: 'C:\\www\\blog',
       instances: 1,
       exec_mode: 'fork',
       watch: false,
@@ -14,9 +13,9 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 3000
       },
-      error_file: '/var/log/pm2/blog-error.log',
-      out_file: '/var/log/pm2/blog-out.log',
-      log_file: '/var/log/pm2/blog.log',
+      error_file: 'C:\\www\\blog\\logs\\blog-error.log',
+      out_file: 'C:\\www\\blog\\logs\\blog-out.log',
+      log_file: 'C:\\www\\blog\\logs\\blog.log',
       time: true
     }
   ]

@@ -490,69 +490,131 @@
         function getSemitoneNote(semitone, rootNote, interval, isMajorInterval, chordType) {
             const normalizedSemitone = ((semitone % 12) + 12) % 12;
             
-            // 获取根音的基本音名（去掉升号）
+            // 先构建基础和弦（自然音根音的和弦），然后整体移调
             const baseRoot = rootNote.replace('#', '');
+            const rootShift = rootNote.includes('#') ? 1 : 0; // 根音的升号偏移
             
-            // 确定基础音符名称（根据音程关系）
-            let baseName;
-            switch (interval) {
-                case 'third':
-                    // 三度：C→E, D→F, E→G, F→A, G→B, A→C, B→D
-                    const thirdMap = {'C': 'E', 'D': 'F', 'E': 'G', 'F': 'A', 'G': 'B', 'A': 'C', 'B': 'D'};
-                    baseName = thirdMap[baseRoot];
+            // 构建基础和弦的音符（以自然音根音为基础）
+            let baseChordNotes;
+            switch (chordType) {
+                case 'major':
+                    // 大三和弦：1-3-5度，都是自然音程
+                    baseChordNotes = {
+                        'root': baseRoot,
+                        'third': getScaleDegree(baseRoot, 3),
+                        'fifth': getScaleDegree(baseRoot, 5)
+                    };
                     break;
-                case 'fifth':
-                    // 五度：C→G, D→A, E→B, F→C, G→D, A→E, B→F
-                    const fifthMap = {'C': 'G', 'D': 'A', 'E': 'B', 'F': 'C', 'G': 'D', 'A': 'E', 'B': 'F'};
-                    baseName = fifthMap[baseRoot];
+                case 'minor':
+                    // 小三和弦：1-b3-5度
+                    baseChordNotes = {
+                        'root': baseRoot,
+                        'third': getScaleDegree(baseRoot, 3) + 'b',  // 小三度
+                        'fifth': getScaleDegree(baseRoot, 5)
+                    };
                     break;
-                case 'seventh':
-                    // 七度：C→B, D→C, E→D, F→E, G→F, A→G, B→A
-                    const seventhMap = {'C': 'B', 'D': 'C', 'E': 'D', 'F': 'E', 'G': 'F', 'A': 'G', 'B': 'A'};
-                    baseName = seventhMap[baseRoot];
+                case 'dominant7':
+                    // 属七和弦：1-3-5-b7度
+                    baseChordNotes = {
+                        'root': baseRoot,
+                        'third': getScaleDegree(baseRoot, 3),
+                        'fifth': getScaleDegree(baseRoot, 5),
+                        'seventh': getScaleDegree(baseRoot, 7) + 'b'  // 小七度
+                    };
+                    break;
+                case 'minor7':
+                    // 小七和弦：1-b3-5-b7度
+                    baseChordNotes = {
+                        'root': baseRoot,
+                        'third': getScaleDegree(baseRoot, 3) + 'b',  // 小三度
+                        'fifth': getScaleDegree(baseRoot, 5),
+                        'seventh': getScaleDegree(baseRoot, 7) + 'b'  // 小七度
+                    };
+                    break;
+                case 'major7':
+                    // 大七和弦：1-3-5-7度
+                    baseChordNotes = {
+                        'root': baseRoot,
+                        'third': getScaleDegree(baseRoot, 3),
+                        'fifth': getScaleDegree(baseRoot, 5),
+                        'seventh': getScaleDegree(baseRoot, 7)  // 大七度
+                    };
                     break;
                 default:
-                    baseName = baseRoot; // 根音
-                    break;
+                    return semitoneToNote[normalizedSemitone];
             }
             
-            if (!baseName) {
-                // 如果找不到基础音名，使用默认映射
-                const defaultMap = {
-                    0: 'C', 1: 'C#', 2: 'D', 3: 'D#', 4: 'E', 5: 'F',
-                    6: 'F#', 7: 'G', 8: 'G#', 9: 'A', 10: 'A#', 11: 'B'
-                };
-                return defaultMap[normalizedSemitone];
+            // 获取当前音程对应的基础音符
+            let baseNote = baseChordNotes[interval];
+            if (!baseNote) {
+                return semitoneToNote[normalizedSemitone];
             }
             
-            // 计算基础音符的半音位置
+            // 如果根音有升号，整个和弦都要升高
+            if (rootShift > 0) {
+                baseNote = transposeNote(baseNote, rootShift);
+            }
+            
+            return baseNote;
+        }
+        
+        // 获取音阶度数对应的音符
+        function getScaleDegree(root, degree) {
+            const scaleMap = {
+                'C': ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+                'D': ['D', 'E', 'F', 'G', 'A', 'B', 'C'],
+                'E': ['E', 'F', 'G', 'A', 'B', 'C', 'D'],
+                'F': ['F', 'G', 'A', 'B', 'C', 'D', 'E'],
+                'G': ['G', 'A', 'B', 'C', 'D', 'E', 'F'],
+                'A': ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
+                'B': ['B', 'C', 'D', 'E', 'F', 'G', 'A']
+            };
+            
+            const scale = scaleMap[root];
+            return scale ? scale[degree - 1] : root;
+        }
+        
+        // 移调音符（添加升号）
+        function transposeNote(note, semitones) {
+            // 处理已有升降号的音符
+            let baseName = note.replace(/[#b]/g, '');
+            let currentAccidental = '';
+            
+            if (note.includes('b')) {
+                currentAccidental = 'b';
+            } else if (note.includes('#')) {
+                currentAccidental = '#';
+            }
+            
+            // 计算当前音符的半音位置
             const baseNoteToSemitone = {
                 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11
             };
             
-            const baseNoteSemitone = baseNoteToSemitone[baseName];
-            const rootSemitone = noteToSemitone[rootNote];
-            
-            // 计算基础音符的自然半音位置
-            const naturalSemitone = baseNoteSemitone;
-            
-            // 计算实际需要的升降号
-            const difference = (normalizedSemitone - naturalSemitone + 12) % 12;
-            
-            if (difference === 0) {
-                return baseName;        // 自然音
-            } else if (difference === 1) {
-                return baseName + '#';  // 升号
-            } else if (difference === 11) {
-                return baseName + 'b';  // 降号
+            let currentSemitone = baseNoteToSemitone[baseName];
+            if (currentAccidental === '#') {
+                currentSemitone = (currentSemitone + 1) % 12;
+            } else if (currentAccidental === 'b') {
+                currentSemitone = (currentSemitone - 1 + 12) % 12;
             }
             
-            // 如果计算有误，返回默认值
-            const defaultMap = {
-                0: 'C', 1: 'C#', 2: 'D', 3: 'D#', 4: 'E', 5: 'F',
-                6: 'F#', 7: 'G', 8: 'G#', 9: 'A', 10: 'A#', 11: 'B'
-            };
-            return defaultMap[normalizedSemitone];
+            // 移调
+            const newSemitone = (currentSemitone + semitones) % 12;
+            
+            // 计算新的升降号
+            const targetBaseSemitone = baseNoteToSemitone[baseName];
+            const difference = (newSemitone - targetBaseSemitone + 12) % 12;
+            
+            if (difference === 0) {
+                return baseName;
+            } else if (difference === 1) {
+                return baseName + '#';
+            } else if (difference === 11) {
+                return baseName + 'b';
+            }
+            
+            // 如果差异太大，可能需要重新计算基础音名
+            return semitoneToNote[newSemitone];
         }
         
         // 弦的调音（从低音弦到高音弦）

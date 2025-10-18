@@ -18,8 +18,9 @@ export default async function HomePage() {
           
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* 吉他指板工具 */}
-            <Link 
-              href="/guitar-tools"
+            <a 
+              href="/三和弦指型练习.html"
+              target="_blank"
               className="group bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-xl border border-blue-200 hover:border-blue-300 transition-all duration-300 hover:shadow-lg"
             >
               <div className="flex items-center mb-4">
@@ -37,7 +38,7 @@ export default async function HomePage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>
-            </Link>
+            </a>
 
             {/* 练习清单工具 */}
             <Link 

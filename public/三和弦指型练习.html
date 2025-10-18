@@ -320,53 +320,38 @@
         <div class="controls">
             <div class="control-group">
                 <div class="control-item">
-                    <label>选择和弦</label>
-                    <select id="chordSelect">
+                    <label>构建和弦</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <!-- 音名选择 -->
+                        <select id="rootNoteSelect" style="padding: 8px; border: 2px solid #3498db; border-radius: 6px;">
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                            <option value="E">E</option>
+                            <option value="F">F</option>
+                            <option value="G">G</option>
+                            <option value="A" selected>A</option>
+                            <option value="B">B</option>
+                        </select>
+                        
+                        <!-- 升号选择 -->
+                        <select id="accidentalSelect" style="padding: 8px; border: 2px solid #3498db; border-radius: 6px;">
+                            <option value="">♮</option>
+                            <option value="#">♯</option>
+                        </select>
+                        
+                        <!-- 和弦类型选择 -->
+                        <select id="chordTypeSelect" style="padding: 8px; border: 2px solid #3498db; border-radius: 6px;">
                         <optgroup label="三和弦">
-                            <option value="Am">A 小三</option>
-                            <option value="A">A 大三</option>
-                            <option value="Bm">B 小三</option>
-                            <option value="B">B 大三</option>
-                            <option value="Cm">C 小三</option>
-                            <option value="C">C 大三</option>
-                            <option value="C#m">C# 小三</option>
-                            <option value="C#">C# 大三</option>
-                            <option value="Dm">D 小三</option>
-                            <option value="D">D 大三</option>
-                            <option value="Em">E 小三</option>
-                            <option value="E">E 大三</option>
-                            <option value="Fm">F 小三</option>
-                            <option value="F">F 大三</option>
-                            <option value="Gm">G 小三</option>
-                            <option value="G">G 大三</option>
+                                <option value="major">大三和弦</option>
+                                <option value="minor" selected>小三和弦</option>
                         </optgroup>
                         <optgroup label="七和弦">
-                            <option value="Am7">A 小七</option>
-                            <option value="A7">A 属七</option>
-                            <option value="Amaj7">A 大七</option>
-                            <option value="Bm7">B 小七</option>
-                            <option value="B7">B 属七</option>
-                            <option value="Bmaj7">B 大七</option>
-                            <option value="Cm7">C 小七</option>
-                            <option value="C7">C 属七</option>
-                            <option value="Cmaj7">C 大七</option>
-                            <option value="C#m7">C# 小七</option>
-                            <option value="C#7">C# 属七</option>
-                            <option value="C#maj7">C# 大七</option>
-                            <option value="Dm7">D 小七</option>
-                            <option value="D7">D 属七</option>
-                            <option value="Dmaj7">D 大七</option>
-                            <option value="Em7">E 小七</option>
-                            <option value="E7">E 属七</option>
-                            <option value="Emaj7">E 大七</option>
-                            <option value="Fm7">F 小七</option>
-                            <option value="F7">F 属七</option>
-                            <option value="Fmaj7">F 大七</option>
-                            <option value="Gm7">G 小七</option>
-                            <option value="G7">G 属七</option>
-                            <option value="Gmaj7">G 大七</option>
+                                <option value="dominant7">属七和弦</option>
+                                <option value="minor7">小七和弦</option>
+                                <option value="major7">大七和弦</option>
                         </optgroup>
                     </select>
+                    </div>
                 </div>
                 
                 <div class="control-item">
@@ -431,65 +416,154 @@
     <script>
         // 音符到半音的映射
         const noteToSemitone = {
-            'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4, 'F': 5,
-            'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11
+            'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4, 'E#': 5, 'Fb': 4, 'F': 5, 'F#': 6, 'Gb': 6,
+            'G': 7, 'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11, 'B#': 0, 'Cb': 11
         };
         
         // 半音到音符的映射
         const semitoneToNote = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
         
-        // 和弦数据定义
-        const chordData = {
-            // 三和弦
-            'Am': { name: 'A 小三和弦', root: 'A', third: 'C', fifth: 'E' },
-            'A': { name: 'A 大三和弦', root: 'A', third: 'C#', fifth: 'E' },
-            'Bm': { name: 'B 小三和弦', root: 'B', third: 'D', fifth: 'F#' },
-            'B': { name: 'B 大三和弦', root: 'B', third: 'D#', fifth: 'F#' },
-            'Cm': { name: 'C 小三和弦', root: 'C', third: 'Eb', fifth: 'G' },
-            'C': { name: 'C 大三和弦', root: 'C', third: 'E', fifth: 'G' },
-            'C#m': { name: 'C# 小三和弦', root: 'C#', third: 'E', fifth: 'G#' },
-            'C#': { name: 'C# 大三和弦', root: 'C#', third: 'F', fifth: 'G#' },
-            'Dm': { name: 'D 小三和弦', root: 'D', third: 'F', fifth: 'A' },
-            'D': { name: 'D 大三和弦', root: 'D', third: 'F#', fifth: 'A' },
-            'Em': { name: 'E 小三和弦', root: 'E', third: 'G', fifth: 'B' },
-            'E': { name: 'E 大三和弦', root: 'E', third: 'G#', fifth: 'B' },
-            'Fm': { name: 'F 小三和弦', root: 'F', third: 'Ab', fifth: 'C' },
-            'F': { name: 'F 大三和弦', root: 'F', third: 'A', fifth: 'C' },
-            'Gm': { name: 'G 小三和弦', root: 'G', third: 'Bb', fifth: 'D' },
-            'G': { name: 'G 大三和弦', root: 'G', third: 'B', fifth: 'D' },
+        // 动态和弦构建函数
+        function buildChord(rootNote, accidental, chordType) {
+            const root = rootNote + (accidental || '');
             
-            // 七和弦
-            'Am7': { name: 'A 小七和弦', root: 'A', third: 'C', fifth: 'E', seventh: 'G' },
-            'A7': { name: 'A 属七和弦', root: 'A', third: 'C#', fifth: 'E', seventh: 'G' },
-            'Amaj7': { name: 'A 大七和弦', root: 'A', third: 'C#', fifth: 'E', seventh: 'G#' },
-            'Bm7': { name: 'B 小七和弦', root: 'B', third: 'D', fifth: 'F#', seventh: 'A' },
-            'B7': { name: 'B 属七和弦', root: 'B', third: 'D#', fifth: 'F#', seventh: 'A' },
-            'Bmaj7': { name: 'B 大七和弦', root: 'B', third: 'D#', fifth: 'F#', seventh: 'A#' },
-            'Cm7': { name: 'C 小七和弦', root: 'C', third: 'Eb', fifth: 'G', seventh: 'Bb' },
-            'C7': { name: 'C 属七和弦', root: 'C', third: 'E', fifth: 'G', seventh: 'Bb' },
-            'Cmaj7': { name: 'C 大七和弦', root: 'C', third: 'E', fifth: 'G', seventh: 'B' },
-            'C#m7': { name: 'C# 小七和弦', root: 'C#', third: 'E', fifth: 'G#', seventh: 'B' },
-            'C#7': { name: 'C# 属七和弦', root: 'C#', third: 'F', fifth: 'G#', seventh: 'B' },
-            'C#maj7': { name: 'C# 大七和弦', root: 'C#', third: 'F', fifth: 'G#', seventh: 'C' },
-            'Dm7': { name: 'D 小七和弦', root: 'D', third: 'F', fifth: 'A', seventh: 'C' },
-            'D7': { name: 'D 属七和弦', root: 'D', third: 'F#', fifth: 'A', seventh: 'C' },
-            'Dmaj7': { name: 'D 大七和弦', root: 'D', third: 'F#', fifth: 'A', seventh: 'C#' },
-            'Em7': { name: 'E 小七和弦', root: 'E', third: 'G', fifth: 'B', seventh: 'D' },
-            'E7': { name: 'E 属七和弦', root: 'E', third: 'G#', fifth: 'B', seventh: 'D' },
-            'Emaj7': { name: 'E 大七和弦', root: 'E', third: 'G#', fifth: 'B', seventh: 'D#' },
-            'Fm7': { name: 'F 小七和弦', root: 'F', third: 'Ab', fifth: 'C', seventh: 'Eb' },
-            'F7': { name: 'F 属七和弦', root: 'F', third: 'A', fifth: 'C', seventh: 'Eb' },
-            'Fmaj7': { name: 'F 大七和弦', root: 'F', third: 'A', fifth: 'C', seventh: 'E' },
-            'Gm7': { name: 'G 小七和弦', root: 'G', third: 'Bb', fifth: 'D', seventh: 'F' },
-            'G7': { name: 'G 属七和弦', root: 'G', third: 'B', fifth: 'D', seventh: 'F' },
-            'Gmaj7': { name: 'G 大七和弦', root: 'G', third: 'B', fifth: 'D', seventh: 'F#' }
-        };
+            // 计算根音的半音位置
+            const rootSemitone = noteToSemitone[root];
+            if (rootSemitone === undefined) {
+                console.error(`无法找到音符 ${root} 的半音位置`);
+                return null;
+            }
+            
+            let third, fifth, seventh;
+            let chordName;
+            
+            // 根据和弦类型计算音程
+            switch (chordType) {
+                case 'major':
+                    third = getSemitoneNote(rootSemitone + 4, root, 'third', true, 'major'); // 大三度
+                    fifth = getSemitoneNote(rootSemitone + 7, root, 'fifth', true, 'major'); // 纯五度
+                    chordName = `${root} 大三和弦`;
+                    break;
+                case 'minor':
+                    third = getSemitoneNote(rootSemitone + 3, root, 'third', false, 'minor'); // 小三度
+                    fifth = getSemitoneNote(rootSemitone + 7, root, 'fifth', true, 'minor'); // 纯五度
+                    chordName = `${root} 小三和弦`;
+                    break;
+                case 'dominant7':
+                    third = getSemitoneNote(rootSemitone + 4, root, 'third', true, 'dominant7'); // 大三度
+                    fifth = getSemitoneNote(rootSemitone + 7, root, 'fifth', true, 'dominant7'); // 纯五度
+                    seventh = getSemitoneNote(rootSemitone + 10, root, 'seventh', false, 'dominant7'); // 小七度
+                    chordName = `${root} 属七和弦`;
+                    break;
+                case 'minor7':
+                    third = getSemitoneNote(rootSemitone + 3, root, 'third', false, 'minor7'); // 小三度
+                    fifth = getSemitoneNote(rootSemitone + 7, root, 'fifth', true, 'minor7'); // 纯五度
+                    seventh = getSemitoneNote(rootSemitone + 10, root, 'seventh', false, 'minor7'); // 小七度
+                    chordName = `${root} 小七和弦`;
+                    break;
+                case 'major7':
+                    third = getSemitoneNote(rootSemitone + 4, root, 'third', true, 'major7'); // 大三度
+                    fifth = getSemitoneNote(rootSemitone + 7, root, 'fifth', true, 'major7'); // 纯五度
+                    seventh = getSemitoneNote(rootSemitone + 11, root, 'seventh', true, 'major7'); // 大七度
+                    chordName = `${root} 大七和弦`;
+                    break;
+                default:
+                    return null;
+            }
+            
+            const chord = {
+                name: chordName,
+                root: root,
+                third: third,
+                fifth: fifth
+            };
+            
+            if (seventh) {
+                chord.seventh = seventh;
+            }
+            
+            console.log(`构建和弦: ${chordName}`, chord);
+            return chord;
+        }
+        
+        // 根据根音和音程关系获取正确的音符名称
+        function getSemitoneNote(semitone, rootNote, interval, isMajorInterval, chordType) {
+            const normalizedSemitone = ((semitone % 12) + 12) % 12;
+            
+            // 获取根音的基本音名（去掉升号）
+            const baseRoot = rootNote.replace('#', '');
+            
+            // 确定基础音符名称（根据音程关系）
+            let baseName;
+            switch (interval) {
+                case 'third':
+                    // 三度：C→E, D→F, E→G, F→A, G→B, A→C, B→D
+                    const thirdMap = {'C': 'E', 'D': 'F', 'E': 'G', 'F': 'A', 'G': 'B', 'A': 'C', 'B': 'D'};
+                    baseName = thirdMap[baseRoot];
+                    break;
+                case 'fifth':
+                    // 五度：C→G, D→A, E→B, F→C, G→D, A→E, B→F
+                    const fifthMap = {'C': 'G', 'D': 'A', 'E': 'B', 'F': 'C', 'G': 'D', 'A': 'E', 'B': 'F'};
+                    baseName = fifthMap[baseRoot];
+                    break;
+                case 'seventh':
+                    // 七度：C→B, D→C, E→D, F→E, G→F, A→G, B→A
+                    const seventhMap = {'C': 'B', 'D': 'C', 'E': 'D', 'F': 'E', 'G': 'F', 'A': 'G', 'B': 'A'};
+                    baseName = seventhMap[baseRoot];
+                    break;
+                default:
+                    baseName = baseRoot; // 根音
+                    break;
+            }
+            
+            if (!baseName) {
+                // 如果找不到基础音名，使用默认映射
+                const defaultMap = {
+                    0: 'C', 1: 'C#', 2: 'D', 3: 'D#', 4: 'E', 5: 'F',
+                    6: 'F#', 7: 'G', 8: 'G#', 9: 'A', 10: 'A#', 11: 'B'
+                };
+                return defaultMap[normalizedSemitone];
+            }
+            
+            // 计算基础音符的半音位置
+            const baseNoteToSemitone = {
+                'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11
+            };
+            
+            const baseNoteSemitone = baseNoteToSemitone[baseName];
+            const rootSemitone = noteToSemitone[rootNote];
+            
+            // 计算目标半音位置（考虑根音的升号）
+            let adjustedBaseSemitone = baseNoteSemitone;
+            if (rootNote.includes('#')) {
+                // 如果根音有升号，相应调整其他音符
+                adjustedBaseSemitone = (baseNoteSemitone + 1) % 12;
+            }
+            
+            // 计算实际需要的升降号
+            const difference = (normalizedSemitone - adjustedBaseSemitone + 12) % 12;
+            
+            if (difference === 0) {
+                return baseName;        // 自然音
+            } else if (difference === 1) {
+                return baseName + '#';  // 升号
+            } else if (difference === 11) {
+                return baseName + 'b';  // 降号
+            }
+            
+            // 如果计算有误，返回默认值
+            const defaultMap = {
+                0: 'C', 1: 'C#', 2: 'D', 3: 'D#', 4: 'E', 5: 'F',
+                6: 'F#', 7: 'G', 8: 'G#', 9: 'A', 10: 'A#', 11: 'B'
+            };
+            return defaultMap[normalizedSemitone];
+        }
         
         // 弦的调音（从低音弦到高音弦）
         const stringTuning = ['E', 'A', 'D', 'G', 'B', 'E'];
         
         // 当前状态
-        let currentChord = 'Am';
+        let currentChord = buildChord('A', '', 'minor'); // 默认选择A小调
         let visibleNotes = {
             root: true,
             third: false,
@@ -561,7 +635,9 @@
             // 清除现有音符
             document.querySelectorAll('.note').forEach(note => note.remove());
             
-            const chord = chordData[currentChord];
+            const chord = currentChord; // currentChord 现在直接是和弦对象
+            if (!chord) return; // 如果没有和弦对象，直接返回
+            
             const strings = document.querySelectorAll('.string-line');
             
             // 遍历每根弦的每个品位
@@ -587,15 +663,11 @@
         function areEnharmonicEquivalents(note1, note2) {
             if (note1 === note2) return true;
             
-            const enharmonicPairs = {
-                'C#': 'Db', 'Db': 'C#',
-                'D#': 'Eb', 'Eb': 'D#',
-                'F#': 'Gb', 'Gb': 'F#',
-                'G#': 'Ab', 'Ab': 'G#',
-                'A#': 'Bb', 'Bb': 'A#'
-            };
+            // 使用半音位置来比较，这样可以处理所有等音异名
+            const semitone1 = noteToSemitone[note1];
+            const semitone2 = noteToSemitone[note2];
             
-            return enharmonicPairs[note1] === note2;
+            return semitone1 !== undefined && semitone2 !== undefined && semitone1 === semitone2;
         }
         
         // 如果音符匹配和弦音，则添加到指板
@@ -641,7 +713,9 @@
         
         // 更新和弦信息
         function updateChordInfo() {
-            const chord = chordData[currentChord];
+            const chord = currentChord; // currentChord 现在直接是和弦对象
+            if (!chord) return; // 如果没有和弦对象，直接返回
+            
             document.getElementById('currentChord').textContent = chord.name;
             const notes = [chord.root, chord.third, chord.fifth];
             if (chord.seventh) {
@@ -651,10 +725,43 @@
         }
         
         // 事件监听器
-        document.getElementById('chordSelect').addEventListener('change', (e) => {
-            currentChord = e.target.value;
+        // 更新当前和弦
+        function updateCurrentChord() {
+            const rootNote = document.getElementById('rootNoteSelect').value;
+            const accidental = document.getElementById('accidentalSelect').value;
+            const chordType = document.getElementById('chordTypeSelect').value;
+            
+            // 避免音乐理论上不常用的组合
+            const problematicCombinations = ['E#', 'B#'];
+            const fullRootNote = rootNote + (accidental || '');
+            
+            if (problematicCombinations.includes(fullRootNote)) {
+                // 自动转换为等音异名
+                const enharmonicMap = {
+                    'E#': { note: 'F', accidental: '' },
+                    'B#': { note: 'C', accidental: '' }
+                };
+                
+                const equivalent = enharmonicMap[fullRootNote];
+                document.getElementById('rootNoteSelect').value = equivalent.note;
+                document.getElementById('accidentalSelect').value = equivalent.accidental;
+                
+                // 递归调用以使用新的值
+                updateCurrentChord();
+                return;
+            }
+            
+            currentChord = buildChord(rootNote, accidental, chordType);
+            if (currentChord) {
             updateFretboard();
-        });
+                updateChordInfo();
+            }
+        }
+        
+        // 为三个选择器添加事件监听器
+        document.getElementById('rootNoteSelect').addEventListener('change', updateCurrentChord);
+        document.getElementById('accidentalSelect').addEventListener('change', updateCurrentChord);
+        document.getElementById('chordTypeSelect').addEventListener('change', updateCurrentChord);
         
         document.getElementById('toggleRoot').addEventListener('click', (e) => {
             visibleNotes.root = !visibleNotes.root;
@@ -699,6 +806,7 @@
         
         // 初始化
         initFretboard();
+        updateCurrentChord(); // 初始化和弦显示
     </script>
 </body>
 </html>

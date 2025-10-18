@@ -533,15 +533,11 @@
             const baseNoteSemitone = baseNoteToSemitone[baseName];
             const rootSemitone = noteToSemitone[rootNote];
             
-            // 计算目标半音位置（考虑根音的升号）
-            let adjustedBaseSemitone = baseNoteSemitone;
-            if (rootNote.includes('#')) {
-                // 如果根音有升号，相应调整其他音符
-                adjustedBaseSemitone = (baseNoteSemitone + 1) % 12;
-            }
+            // 计算基础音符的自然半音位置
+            const naturalSemitone = baseNoteSemitone;
             
             // 计算实际需要的升降号
-            const difference = (normalizedSemitone - adjustedBaseSemitone + 12) % 12;
+            const difference = (normalizedSemitone - naturalSemitone + 12) % 12;
             
             if (difference === 0) {
                 return baseName;        // 自然音

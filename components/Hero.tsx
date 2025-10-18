@@ -1,4 +1,5 @@
-import { BookOpen, Coffee, Smile } from 'lucide-react'
+import { BookOpen, Coffee, Smile, Guitar } from 'lucide-react'
+import Link from 'next/link'
 
 export default function Hero() {
   return (
@@ -15,7 +16,7 @@ export default function Hero() {
           用文字记录成长的足迹，用故事连接你我的心。
         </p>
 
-        <div className="flex justify-center items-center space-x-8 text-gray-600">
+        <div className="flex justify-center items-center space-x-8 text-gray-600 mb-8">
           <div className="flex items-center">
             <BookOpen className="w-6 h-6 mr-2 text-blue-600" />
             <span>阅读</span>
@@ -28,6 +29,17 @@ export default function Hero() {
             <Smile className="w-6 h-6 mr-2 text-blue-600" />
             <span>分享</span>
           </div>
+        </div>
+
+        {/* 吉他工具快速入口 */}
+        <div className="mt-8">
+          <Link 
+            href="/guitar-tools"
+            className="inline-flex items-center px-8 py-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl transform hover:scale-105"
+          >
+            <Guitar className="w-6 h-6 mr-3" />
+            🎸 吉他和弦指型练习工具
+          </Link>
         </div>
       </div>
     </section>

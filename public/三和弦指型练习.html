@@ -583,17 +583,32 @@
             updateChordInfo();
         }
         
+        // 检查两个音符是否为等音异名
+        function areEnharmonicEquivalents(note1, note2) {
+            if (note1 === note2) return true;
+            
+            const enharmonicPairs = {
+                'C#': 'Db', 'Db': 'C#',
+                'D#': 'Eb', 'Eb': 'D#',
+                'F#': 'Gb', 'Gb': 'F#',
+                'G#': 'Ab', 'Ab': 'G#',
+                'A#': 'Bb', 'Bb': 'A#'
+            };
+            
+            return enharmonicPairs[note1] === note2;
+        }
+        
         // 如果音符匹配和弦音，则添加到指板
         function addNoteIfMatch(stringLine, note, fret, chord) {
             let noteType = null;
             
-            if (note === chord.root && visibleNotes.root) {
+            if (areEnharmonicEquivalents(note, chord.root) && visibleNotes.root) {
                 noteType = 'root-note';
-            } else if (note === chord.third && visibleNotes.third) {
+            } else if (areEnharmonicEquivalents(note, chord.third) && visibleNotes.third) {
                 noteType = 'third-note';
-            } else if (note === chord.fifth && visibleNotes.fifth) {
+            } else if (areEnharmonicEquivalents(note, chord.fifth) && visibleNotes.fifth) {
                 noteType = 'fifth-note';
-            } else if (chord.seventh && note === chord.seventh && visibleNotes.seventh) {
+            } else if (chord.seventh && areEnharmonicEquivalents(note, chord.seventh) && visibleNotes.seventh) {
                 noteType = 'seventh-note';
             }
             

@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三和弦指型练习 - 交互式吉他指板</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-item label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9em;
+        }
+        
+        select, button {
+            padding: 10px 15px;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        select:hover, button:hover {
+            border-color: #2980b9;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        button.active {
+            background: #e74c3c;
+            border-color: #c0392b;
+        }
+        
+        .fretboard-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+        
+        .fretboard {
+            margin: 0 auto;
+            background: #8B4513;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+            min-width: 900px;
+        }
+        
+        .string {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            position: relative;
+            height: 20px;
+        }
+        
+        .string:last-child {
+            margin-bottom: 0;
+        }
+        
+        .string-label {
+            width: 30px;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            font-size: 18px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .string-line {
+            flex: 1;
+            height: 3px;
+            background: linear-gradient(to right, #C0C0C0, #808080);
+            position: relative;
+            border-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        .fret {
+            position: absolute;
+            width: 3px;
+            height: 60px;
+            background: #654321;
+            top: -28px;
+            box-shadow: 1px 0 2px rgba(0,0,0,0.3);
+        }
+        
+        .fret-number {
+            position: absolute;
+            bottom: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        }
+        
+        .fret-number.special {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .note {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 11px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform: translate(-50%, -50%);
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .note:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        
+        .note.root-note {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+        
+        .note.third-note {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+        }
+        
+        .note.fifth-note {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+        
+        .note.seventh-note {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
+        
+        .legend {
+            padding: 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .legend h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .legend-items {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        
+        .legend-color.root-note {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+        
+        .legend-color.third-note {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+        }
+        
+        .legend-color.fifth-note {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+        
+        .legend-color.seventh-note {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
+        
+        .info-panel {
+            padding: 30px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .chord-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .chord-info h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .chord-notes {
+            font-size: 1.2em;
+            color: #7f8c8d;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .control-group {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .legend-items {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+            
+            .fretboard {
+                min-width: 800px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎸 三和弦指型练习</h1>
+            <p>交互式吉他指板 - 学习和练习三和弦的各种转位</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <div class="control-item">
+                    <label>选择和弦</label>
+                    <select id="chordSelect">
+                        <optgroup label="三和弦">
+                            <option value="Am">A 小三</option>
+                            <option value="A">A 大三</option>
+                            <option value="Bm">B 小三</option>
+                            <option value="B">B 大三</option>
+                            <option value="Cm">C 小三</option>
+                            <option value="C">C 大三</option>
+                            <option value="C#m">C# 小三</option>
+                            <option value="C#">C# 大三</option>
+                            <option value="Dm">D 小三</option>
+                            <option value="D">D 大三</option>
+                            <option value="Em">E 小三</option>
+                            <option value="E">E 大三</option>
+                            <option value="Fm">F 小三</option>
+                            <option value="F">F 大三</option>
+                            <option value="Gm">G 小三</option>
+                            <option value="G">G 大三</option>
+                        </optgroup>
+                        <optgroup label="七和弦">
+                            <option value="Am7">A 小七</option>
+                            <option value="A7">A 属七</option>
+                            <option value="Amaj7">A 大七</option>
+                            <option value="Bm7">B 小七</option>
+                            <option value="B7">B 属七</option>
+                            <option value="Bmaj7">B 大七</option>
+                            <option value="Cm7">C 小七</option>
+                            <option value="C7">C 属七</option>
+                            <option value="Cmaj7">C 大七</option>
+                            <option value="C#m7">C# 小七</option>
+                            <option value="C#7">C# 属七</option>
+                            <option value="C#maj7">C# 大七</option>
+                            <option value="Dm7">D 小七</option>
+                            <option value="D7">D 属七</option>
+                            <option value="Dmaj7">D 大七</option>
+                            <option value="Em7">E 小七</option>
+                            <option value="E7">E 属七</option>
+                            <option value="Emaj7">E 大七</option>
+                            <option value="Fm7">F 小七</option>
+                            <option value="F7">F 属七</option>
+                            <option value="Fmaj7">F 大七</option>
+                            <option value="Gm7">G 小七</option>
+                            <option value="G7">G 属七</option>
+                            <option value="Gmaj7">G 大七</option>
+                        </optgroup>
+                    </select>
+                </div>
+                
+                <div class="control-item">
+                    <label>显示音符</label>
+                    <button id="toggleRoot" class="active">根音</button>
+                </div>
+                
+                <div class="control-item">
+                    <button id="toggleThird">三音</button>
+                </div>
+                
+                <div class="control-item">
+                    <button id="toggleFifth">五音</button>
+                </div>
+                
+                <div class="control-item">
+                    <button id="toggleSeventh">七音</button>
+                </div>
+                
+                <div class="control-item">
+                    <button id="showAll">显示全部</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="fretboard-container">
+            <div class="fretboard" id="fretboard">
+                <!-- 吉他指板将通过JavaScript生成 -->
+            </div>
+        </div>
+        
+        <div class="legend">
+            <h3>图例说明</h3>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-color root-note"></div>
+                    <span>根音 (1)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color third-note"></div>
+                    <span>三音 (3)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color fifth-note"></div>
+                    <span>五音 (5)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color seventh-note"></div>
+                    <span>七音 (7)</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <div class="chord-info">
+                <h2 id="currentChord">A 小三和弦</h2>
+                <div class="chord-notes" id="chordNotes">A - C - E</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 音符到半音的映射
+        const noteToSemitone = {
+            'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4, 'F': 5,
+            'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11
+        };
+        
+        // 半音到音符的映射
+        const semitoneToNote = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        
+        // 和弦数据定义
+        const chordData = {
+            // 三和弦
+            'Am': { name: 'A 小三和弦', root: 'A', third: 'C', fifth: 'E' },
+            'A': { name: 'A 大三和弦', root: 'A', third: 'C#', fifth: 'E' },
+            'Bm': { name: 'B 小三和弦', root: 'B', third: 'D', fifth: 'F#' },
+            'B': { name: 'B 大三和弦', root: 'B', third: 'D#', fifth: 'F#' },
+            'Cm': { name: 'C 小三和弦', root: 'C', third: 'Eb', fifth: 'G' },
+            'C': { name: 'C 大三和弦', root: 'C', third: 'E', fifth: 'G' },
+            'C#m': { name: 'C# 小三和弦', root: 'C#', third: 'E', fifth: 'G#' },
+            'C#': { name: 'C# 大三和弦', root: 'C#', third: 'F', fifth: 'G#' },
+            'Dm': { name: 'D 小三和弦', root: 'D', third: 'F', fifth: 'A' },
+            'D': { name: 'D 大三和弦', root: 'D', third: 'F#', fifth: 'A' },
+            'Em': { name: 'E 小三和弦', root: 'E', third: 'G', fifth: 'B' },
+            'E': { name: 'E 大三和弦', root: 'E', third: 'G#', fifth: 'B' },
+            'Fm': { name: 'F 小三和弦', root: 'F', third: 'Ab', fifth: 'C' },
+            'F': { name: 'F 大三和弦', root: 'F', third: 'A', fifth: 'C' },
+            'Gm': { name: 'G 小三和弦', root: 'G', third: 'Bb', fifth: 'D' },
+            'G': { name: 'G 大三和弦', root: 'G', third: 'B', fifth: 'D' },
+            
+            // 七和弦
+            'Am7': { name: 'A 小七和弦', root: 'A', third: 'C', fifth: 'E', seventh: 'G' },
+            'A7': { name: 'A 属七和弦', root: 'A', third: 'C#', fifth: 'E', seventh: 'G' },
+            'Amaj7': { name: 'A 大七和弦', root: 'A', third: 'C#', fifth: 'E', seventh: 'G#' },
+            'Bm7': { name: 'B 小七和弦', root: 'B', third: 'D', fifth: 'F#', seventh: 'A' },
+            'B7': { name: 'B 属七和弦', root: 'B', third: 'D#', fifth: 'F#', seventh: 'A' },
+            'Bmaj7': { name: 'B 大七和弦', root: 'B', third: 'D#', fifth: 'F#', seventh: 'A#' },
+            'Cm7': { name: 'C 小七和弦', root: 'C', third: 'Eb', fifth: 'G', seventh: 'Bb' },
+            'C7': { name: 'C 属七和弦', root: 'C', third: 'E', fifth: 'G', seventh: 'Bb' },
+            'Cmaj7': { name: 'C 大七和弦', root: 'C', third: 'E', fifth: 'G', seventh: 'B' },
+            'C#m7': { name: 'C# 小七和弦', root: 'C#', third: 'E', fifth: 'G#', seventh: 'B' },
+            'C#7': { name: 'C# 属七和弦', root: 'C#', third: 'F', fifth: 'G#', seventh: 'B' },
+            'C#maj7': { name: 'C# 大七和弦', root: 'C#', third: 'F', fifth: 'G#', seventh: 'C' },
+            'Dm7': { name: 'D 小七和弦', root: 'D', third: 'F', fifth: 'A', seventh: 'C' },
+            'D7': { name: 'D 属七和弦', root: 'D', third: 'F#', fifth: 'A', seventh: 'C' },
+            'Dmaj7': { name: 'D 大七和弦', root: 'D', third: 'F#', fifth: 'A', seventh: 'C#' },
+            'Em7': { name: 'E 小七和弦', root: 'E', third: 'G', fifth: 'B', seventh: 'D' },
+            'E7': { name: 'E 属七和弦', root: 'E', third: 'G#', fifth: 'B', seventh: 'D' },
+            'Emaj7': { name: 'E 大七和弦', root: 'E', third: 'G#', fifth: 'B', seventh: 'D#' },
+            'Fm7': { name: 'F 小七和弦', root: 'F', third: 'Ab', fifth: 'C', seventh: 'Eb' },
+            'F7': { name: 'F 属七和弦', root: 'F', third: 'A', fifth: 'C', seventh: 'Eb' },
+            'Fmaj7': { name: 'F 大七和弦', root: 'F', third: 'A', fifth: 'C', seventh: 'E' },
+            'Gm7': { name: 'G 小七和弦', root: 'G', third: 'Bb', fifth: 'D', seventh: 'F' },
+            'G7': { name: 'G 属七和弦', root: 'G', third: 'B', fifth: 'D', seventh: 'F' },
+            'Gmaj7': { name: 'G 大七和弦', root: 'G', third: 'B', fifth: 'D', seventh: 'F#' }
+        };
+        
+        // 弦的调音（从低音弦到高音弦）
+        const stringTuning = ['E', 'A', 'D', 'G', 'B', 'E'];
+        
+        // 当前状态
+        let currentChord = 'Am';
+        let visibleNotes = {
+            root: true,
+            third: false,
+            fifth: false,
+            seventh: false
+        };
+        
+        // 计算指板上的音符
+        function getNoteAtFret(stringIndex, fret) {
+            const openNote = stringTuning[stringIndex];
+            const openSemitone = noteToSemitone[openNote];
+            const targetSemitone = (openSemitone + fret) % 12;
+            return semitoneToNote[targetSemitone];
+        }
+        
+        // 初始化指板
+        function initFretboard() {
+            const fretboard = document.getElementById('fretboard');
+            fretboard.innerHTML = '';
+            
+            // 创建6根弦（从高音弦到低音弦显示）
+            for (let stringNum = 6; stringNum >= 1; stringNum--) {
+                const stringDiv = document.createElement('div');
+                stringDiv.className = 'string';
+                
+                // 弦标签
+                const label = document.createElement('div');
+                label.className = 'string-label';
+                label.textContent = stringTuning[stringNum - 1];
+                stringDiv.appendChild(label);
+                
+                // 弦线
+                const stringLine = document.createElement('div');
+                stringLine.className = 'string-line';
+                stringLine.setAttribute('data-string', stringNum);
+                
+                // 添加品丝
+                for (let fret = 1; fret <= 22; fret++) {
+                    const fretDiv = document.createElement('div');
+                    fretDiv.className = 'fret';
+                    fretDiv.style.left = `${(fret - 0.5) * (100 / 22)}%`;
+                    stringLine.appendChild(fretDiv);
+                }
+                
+                // 只在最后一根弦（最低音弦）上显示品位数字
+                if (stringNum === 1) {
+                    const specialFrets = [3, 5, 7, 9, 12, 15, 17, 19, 21];
+                    for (let fret = 1; fret <= 22; fret++) {
+                        const fretNumber = document.createElement('div');
+                        fretNumber.className = specialFrets.includes(fret) ? 'fret-number special' : 'fret-number';
+                        fretNumber.textContent = fret;
+                        fretNumber.style.position = 'absolute';
+                        fretNumber.style.left = `${fret * (100 / 22)}%`;
+                        fretNumber.style.transform = 'translateX(-50%)';
+                        fretNumber.style.bottom = '-28px';
+                        stringLine.appendChild(fretNumber);
+                    }
+                }
+                
+                stringDiv.appendChild(stringLine);
+                fretboard.appendChild(stringDiv);
+            }
+            
+            updateFretboard();
+        }
+        
+        // 更新指板显示
+        function updateFretboard() {
+            // 清除现有音符
+            document.querySelectorAll('.note').forEach(note => note.remove());
+            
+            const chord = chordData[currentChord];
+            const strings = document.querySelectorAll('.string-line');
+            
+            // 遍历每根弦的每个品位
+            strings.forEach((stringLine, index) => {
+                const stringNum = parseInt(stringLine.getAttribute('data-string'));
+                
+                // 检查开放弦（0品）
+                const openNote = getNoteAtFret(stringNum - 1, 0);
+                addNoteIfMatch(stringLine, openNote, 0, chord);
+                
+                // 检查1-22品
+                for (let fret = 1; fret <= 22; fret++) {
+                    const note = getNoteAtFret(stringNum - 1, fret);
+                    addNoteIfMatch(stringLine, note, fret, chord);
+                }
+            });
+            
+            // 更新和弦信息
+            updateChordInfo();
+        }
+        
+        // 如果音符匹配和弦音，则添加到指板
+        function addNoteIfMatch(stringLine, note, fret, chord) {
+            let noteType = null;
+            
+            if (note === chord.root && visibleNotes.root) {
+                noteType = 'root-note';
+            } else if (note === chord.third && visibleNotes.third) {
+                noteType = 'third-note';
+            } else if (note === chord.fifth && visibleNotes.fifth) {
+                noteType = 'fifth-note';
+            } else if (chord.seventh && note === chord.seventh && visibleNotes.seventh) {
+                noteType = 'seventh-note';
+            }
+            
+            if (noteType) {
+                const noteElement = document.createElement('div');
+                noteElement.className = `note ${noteType}`;
+                noteElement.textContent = note;
+                noteElement.style.left = fret === 0 ? '-12.5px' : `${fret * (100 / 22)}%`;
+                noteElement.title = `${note} - ${getNoteTypeName(noteType)}`;
+                
+                stringLine.appendChild(noteElement);
+            }
+        }
+        
+        // 获取音符类型名称
+        function getNoteTypeName(type) {
+            const names = {
+                'root-note': '根音',
+                'third-note': '三音',
+                'fifth-note': '五音',
+                'seventh-note': '七音'
+            };
+            return names[type] || type;
+        }
+        
+        // 更新和弦信息
+        function updateChordInfo() {
+            const chord = chordData[currentChord];
+            document.getElementById('currentChord').textContent = chord.name;
+            const notes = [chord.root, chord.third, chord.fifth];
+            if (chord.seventh) {
+                notes.push(chord.seventh);
+            }
+            document.getElementById('chordNotes').textContent = notes.join(' - ');
+        }
+        
+        // 事件监听器
+        document.getElementById('chordSelect').addEventListener('change', (e) => {
+            currentChord = e.target.value;
+            updateFretboard();
+        });
+        
+        document.getElementById('toggleRoot').addEventListener('click', (e) => {
+            visibleNotes.root = !visibleNotes.root;
+            e.target.classList.toggle('active');
+            updateFretboard();
+        });
+        
+        document.getElementById('toggleThird').addEventListener('click', (e) => {
+            visibleNotes.third = !visibleNotes.third;
+            e.target.classList.toggle('active');
+            updateFretboard();
+        });
+        
+        document.getElementById('toggleFifth').addEventListener('click', (e) => {
+            visibleNotes.fifth = !visibleNotes.fifth;
+            e.target.classList.toggle('active');
+            updateFretboard();
+        });
+        
+        document.getElementById('toggleSeventh').addEventListener('click', (e) => {
+            visibleNotes.seventh = !visibleNotes.seventh;
+            e.target.classList.toggle('active');
+            updateFretboard();
+        });
+        
+        document.getElementById('showAll').addEventListener('click', () => {
+            const allVisible = Object.values(visibleNotes).every(v => v);
+            const newState = !allVisible;
+            
+            visibleNotes.root = newState;
+            visibleNotes.third = newState;
+            visibleNotes.fifth = newState;
+            visibleNotes.seventh = newState;
+            
+            document.getElementById('toggleRoot').classList.toggle('active', newState);
+            document.getElementById('toggleThird').classList.toggle('active', newState);
+            document.getElementById('toggleFifth').classList.toggle('active', newState);
+            document.getElementById('toggleSeventh').classList.toggle('active', newState);
+            
+            updateFretboard();
+        });
+        
+        // 初始化
+        initFretboard();
+    </script>
+</body>
+</html>

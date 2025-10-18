@@ -28,9 +28,9 @@ export default function Header() {
             <Link href="/archive" className="text-gray-700 hover:text-blue-600 transition-colors">
               文章归档
             </Link>
-            <Link href="/guitar-tools" className="text-gray-700 hover:text-blue-600 transition-colors">
+            <a href="/三和弦指型练习.html" target="_blank" className="text-gray-700 hover:text-blue-600 transition-colors">
               吉他工具
-            </Link>
+            </a>
             <Link href="/contact" className="text-gray-700 hover:text-blue-600 transition-colors">
               联系方式
             </Link>
@@ -74,13 +74,14 @@ export default function Header() {
               >
                 文章归档
               </Link>
-              <Link 
-                href="/guitar-tools" 
+              <a 
+                href="/三和弦指型练习.html" 
+                target="_blank"
                 className="text-gray-700 hover:text-blue-600 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 吉他工具
-              </Link>
+              </a>
               <Link 
                 href="/contact" 
                 className="text-gray-700 hover:text-blue-600 transition-colors"

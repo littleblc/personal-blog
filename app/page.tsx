@@ -41,8 +41,9 @@ export default async function HomePage() {
             </a>
 
             {/* 练习清单工具 */}
-            <Link 
-              href="/guitar-tools/practice-checklist"
+            <a 
+              href="/三和弦练习检查清单.html"
+              target="_blank"
               className="group bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-xl border border-green-200 hover:border-green-300 transition-all duration-300 hover:shadow-lg"
             >
               <div className="flex items-center mb-4">
@@ -60,7 +61,7 @@ export default async function HomePage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>
-            </Link>
+            </a>
           </div>
         </div>
       </section>

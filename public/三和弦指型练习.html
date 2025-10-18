@@ -601,23 +601,28 @@
         // 如果音符匹配和弦音，则添加到指板
         function addNoteIfMatch(stringLine, note, fret, chord) {
             let noteType = null;
+            let displayNote = note; // 默认显示指板上的音符
             
             if (areEnharmonicEquivalents(note, chord.root) && visibleNotes.root) {
                 noteType = 'root-note';
+                displayNote = chord.root; // 显示和弦中定义的音符名称
             } else if (areEnharmonicEquivalents(note, chord.third) && visibleNotes.third) {
                 noteType = 'third-note';
+                displayNote = chord.third; // 显示和弦中定义的音符名称
             } else if (areEnharmonicEquivalents(note, chord.fifth) && visibleNotes.fifth) {
                 noteType = 'fifth-note';
+                displayNote = chord.fifth; // 显示和弦中定义的音符名称
             } else if (chord.seventh && areEnharmonicEquivalents(note, chord.seventh) && visibleNotes.seventh) {
                 noteType = 'seventh-note';
+                displayNote = chord.seventh; // 显示和弦中定义的音符名称
             }
             
             if (noteType) {
                 const noteElement = document.createElement('div');
                 noteElement.className = `note ${noteType}`;
-                noteElement.textContent = note;
+                noteElement.textContent = displayNote; // 显示正确的音符名称
                 noteElement.style.left = fret === 0 ? '-12.5px' : `${fret * (100 / 22)}%`;
-                noteElement.title = `${note} - ${getNoteTypeName(noteType)}`;
+                noteElement.title = `${displayNote} - ${getNoteTypeName(noteType)}`;
                 
                 stringLine.appendChild(noteElement);
             }

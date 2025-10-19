@@ -498,46 +498,46 @@
             let baseChordNotes;
             switch (chordType) {
                 case 'major':
-                    // 大三和弦：1-3-5度，都是自然音程
+                    // 大三和弦：1-大3-纯5度
                     baseChordNotes = {
                         'root': baseRoot,
-                        'third': getScaleDegree(baseRoot, 3),
-                        'fifth': getScaleDegree(baseRoot, 5)
+                        'third': getMajorThird(baseRoot),
+                        'fifth': getPerfectFifth(baseRoot)
                     };
                     break;
                 case 'minor':
-                    // 小三和弦：1-b3-5度
+                    // 小三和弦：1-小3-纯5度
                     baseChordNotes = {
                         'root': baseRoot,
-                        'third': getScaleDegree(baseRoot, 3) + 'b',  // 小三度
-                        'fifth': getScaleDegree(baseRoot, 5)
+                        'third': getMinorThird(baseRoot),
+                        'fifth': getPerfectFifth(baseRoot)
                     };
                     break;
                 case 'dominant7':
-                    // 属七和弦：1-3-5-b7度
+                    // 属七和弦：1-大3-纯5-小7度
                     baseChordNotes = {
                         'root': baseRoot,
-                        'third': getScaleDegree(baseRoot, 3),
-                        'fifth': getScaleDegree(baseRoot, 5),
-                        'seventh': getScaleDegree(baseRoot, 7) + 'b'  // 小七度
+                        'third': getMajorThird(baseRoot),
+                        'fifth': getPerfectFifth(baseRoot),
+                        'seventh': getMinorSeventh(baseRoot)
                     };
                     break;
                 case 'minor7':
-                    // 小七和弦：1-b3-5-b7度
+                    // 小七和弦：1-小3-纯5-小7度
                     baseChordNotes = {
                         'root': baseRoot,
-                        'third': getScaleDegree(baseRoot, 3) + 'b',  // 小三度
-                        'fifth': getScaleDegree(baseRoot, 5),
-                        'seventh': getScaleDegree(baseRoot, 7) + 'b'  // 小七度
+                        'third': getMinorThird(baseRoot),
+                        'fifth': getPerfectFifth(baseRoot),
+                        'seventh': getMinorSeventh(baseRoot)
                     };
                     break;
                 case 'major7':
-                    // 大七和弦：1-3-5-7度
+                    // 大七和弦：1-大3-纯5-大7度
                     baseChordNotes = {
                         'root': baseRoot,
-                        'third': getScaleDegree(baseRoot, 3),
-                        'fifth': getScaleDegree(baseRoot, 5),
-                        'seventh': getScaleDegree(baseRoot, 7)  // 大七度
+                        'third': getMajorThird(baseRoot),
+                        'fifth': getPerfectFifth(baseRoot),
+                        'seventh': getMajorSeventh(baseRoot)
                     };
                     break;
                 default:
@@ -556,6 +556,76 @@
             }
             
             return baseNote;
+        }
+        
+        // 获取大三度音符
+        function getMajorThird(root) {
+            const majorThirdMap = {
+                'C': 'E',   // C大三度 = E
+                'D': 'F#',  // D大三度 = F#
+                'E': 'G#',  // E大三度 = G#
+                'F': 'A',   // F大三度 = A
+                'G': 'B',   // G大三度 = B
+                'A': 'C#',  // A大三度 = C#
+                'B': 'D#'   // B大三度 = D#
+            };
+            return majorThirdMap[root] || root;
+        }
+        
+        // 获取纯五度音符
+        function getPerfectFifth(root) {
+            const perfectFifthMap = {
+                'C': 'G',   // C纯五度 = G
+                'D': 'A',   // D纯五度 = A
+                'E': 'B',   // E纯五度 = B
+                'F': 'C',   // F纯五度 = C
+                'G': 'D',   // G纯五度 = D
+                'A': 'E',   // A纯五度 = E
+                'B': 'F#'   // B纯五度 = F#
+            };
+            return perfectFifthMap[root] || root;
+        }
+        
+        // 获取小三度音符
+        function getMinorThird(root) {
+            const minorThirdMap = {
+                'C': 'Eb',  // C小三度 = Eb
+                'D': 'F',   // D小三度 = F
+                'E': 'G',   // E小三度 = G
+                'F': 'Ab',  // F小三度 = Ab
+                'G': 'Bb',  // G小三度 = Bb
+                'A': 'C',   // A小三度 = C
+                'B': 'D'    // B小三度 = D
+            };
+            return minorThirdMap[root] || root;
+        }
+        
+        // 获取小七度音符
+        function getMinorSeventh(root) {
+            const minorSeventhMap = {
+                'C': 'Bb',  // C小七度 = Bb
+                'D': 'C',   // D小七度 = C
+                'E': 'D',   // E小七度 = D
+                'F': 'Eb',  // F小七度 = Eb
+                'G': 'F',   // G小七度 = F
+                'A': 'G',   // A小七度 = G
+                'B': 'A'    // B小七度 = A
+            };
+            return minorSeventhMap[root] || root;
+        }
+        
+        // 获取大七度音符
+        function getMajorSeventh(root) {
+            const majorSeventhMap = {
+                'C': 'B',   // C大七度 = B
+                'D': 'C#',  // D大七度 = C#
+                'E': 'D#',  // E大七度 = D#
+                'F': 'E',   // F大七度 = E
+                'G': 'F#',  // G大七度 = F#
+                'A': 'G#',  // A大七度 = G#
+                'B': 'A#'   // B大七度 = A#
+            };
+            return majorSeventhMap[root] || root;
         }
         
         // 获取音阶度数对应的音符
